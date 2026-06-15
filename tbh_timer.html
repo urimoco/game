@@ -43,7 +43,8 @@
         .btn-edit-action { padding: 6px 14px; font-size: 14px; background-color: #333; color: #fff; border: 1px solid #555; }
         .btn-edit-action:hover { background-color: #444; }
         .btn-add { border-color: #00ff88; color: #00ff88; }
-        .btn-remove-row { border-color: #ff3333; color: #ff3333; cursor: pointer; }
+        .btn-remove-row { border: none !important; background: transparent !important; color: #ff3333 !important; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .btn-remove-row:hover { color: #ff8888 !important; }
         .memo-section { max-width: 850px; margin: 0 auto 40px auto; background-color: #161616; padding: 20px; border-radius: 10px; border: 1px solid #2ae5ff33; text-align: left; color: #ccc; }
         .memo-section h2 { font-size: 16px; color: #00e5ff; margin-top: 0; }
     </style>
@@ -120,25 +121,39 @@
         window.onload = function() {
             const savedMin = localStorage.getItem('tb_hero_g_min');
             if(savedMin !== null) document.getElementById('global-target-min').value = savedMin;
+            
             const savedData = localStorage.getItem('tb_hero_route');
             if (savedData) {
-                try { JSON.parse(savedData).forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds)); } catch(e) { loadDefaultRoute(); }
+                try { 
+                    JSON.parse(savedData).forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds)); 
+                } catch(e) { loadDefaultRoute(); }
             } else { loadDefaultRoute(); }
+            
             initFirstStageDisplay();
             calculateRouteTotal();
             updateStageTimersDisplay();
         };
+
+        // ページを離れる際に強制保存
+        window.addEventListener('beforeunload', syncRouteFromEditor);
 
         function loadDefaultRoute() { DEFAULT_ROUTE.forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds)); }
         
         function addEditorRow(diff = "ノーマル", stage = "2-5", secs = 60) {
             const index = editorList.children.length;
             const row = document.createElement('div'); row.className = 'route-row';
+            
+            const diffs = ["ノーマル", "ナイトメア", "ヘル", "トーメント"];
+            const stageOptions = Array.from({length:30}, (_,i) => {
+                const s = `${Math.floor(i/10)+1}-${(i%10)+1}`;
+                return `<option value="${s}" ${s === stage ? 'selected' : ''}>${s}</option>`;
+            }).join('');
+
             row.innerHTML = `<span class="index-lbl">${index + 1}.</span>` +
-                `<select class="edit-diff">${["ノーマル", "ナイトメア", "ヘル", "トーメント"].map(d => `<option value="${d}" ${d === diff ? 'selected' : ''}>${d}</option>`).join('')}</select>` +
-                `<select class="edit-stage">${Array.from({length:30}, (_,i) => `<option value="${Math.floor(i/10)+1}-${(i%10)+1}" ${Math.floor(i/10)+1}-${(i%10)+1 === stage ? 'selected' : ''}>${Math.floor(i/10)+1}-${(i%10)+1}</option>`).join('')}</select>` +
-                `<input type="number" class="edit-secs sec-input" value="${secs}" oninput="calculateRouteTotal()"> 秒` +
-                `<button class="btn-edit-action btn-remove-row" onclick="removeRow(${index})">×</button>` +
+                `<select class="edit-diff" onchange="syncRouteFromEditor(); calculateRouteTotal();">${diffs.map(d => `<option value="${d}" ${d === diff ? 'selected' : ''}>${d}</option>`).join('')}</select>` +
+                `<select class="edit-stage" onchange="syncRouteFromEditor();">${stageOptions}</select>` +
+                `<input type="number" class="edit-secs sec-input" value="${secs}" oninput="calculateRouteTotal(); syncRouteFromEditor();"> 秒` +
+                `<button class="btn-remove-row" onclick="removeRow(${index})">✕</button>` +
                 `<div class="stage-timer-badge" id="stage-timer-${index}">待機中</div>`;
             editorList.appendChild(row);
         }
@@ -155,14 +170,22 @@
         }
 
         function addEditorRowWithSave() { addEditorRow(); syncRouteFromEditor(); calculateRouteTotal(); }
+        
         function syncRouteFromEditor() {
             rotationRoute = [];
-            editorList.querySelectorAll('.route-row').forEach(row => { rotationRoute.push({ difficulty: row.querySelector('.edit-diff').value, stage: row.querySelector('.edit-stage').value, seconds: parseInt(row.querySelector('.edit-secs').value, 10) }); });
+            editorList.querySelectorAll('.route-row').forEach(row => { 
+                rotationRoute.push({ 
+                    difficulty: row.querySelector('.edit-diff').value, 
+                    stage: row.querySelector('.edit-stage').value, 
+                    seconds: parseInt(row.querySelector('.edit-secs').value, 10) 
+                }); 
+            });
             localStorage.setItem('tb_hero_route', JSON.stringify(rotationRoute));
         }
-        // 以下、タイマー関連のロジックは以前のものを維持
+        
         function initFirstStageDisplay() { syncRouteFromEditor(); if (rotationRoute.length > 0) { updateDisplay(rotationRoute[0].seconds); statusDiv.textContent = `待機中 (次: ${rotationRoute[0].difficulty} ${rotationRoute[0].stage})`; } }
         function saveGlobalTarget() { localStorage.setItem('tb_hero_g_min', document.getElementById('global-target-min').value); }
+        
         function calculateRouteTotal() {
             let totalSec = 0;
             editorList.querySelectorAll('.route-row').forEach(row => { totalSec += parseInt(row.querySelector('.edit-secs').value, 10) || 0; });
@@ -170,6 +193,7 @@
             let statusText = diff < 0 ? `<span style="color: #00e5ff; font-weight:bold;">${Math.abs(diff)}秒足りない</span>` : `<span style="color: #00ff88; font-weight:bold;">${diff}秒足りる</span>`;
             document.getElementById('calc-result').innerHTML = `📋 合計: <strong>${rMin}分${rSec}秒</strong> ／ 宝箱リキャストに対して: ${statusText}`;
         }
+        
         function updateStageTimersDisplay() {
             const targetTotalSeconds = (parseInt(document.getElementById('global-target-min').value, 10) || 0) * 60;
             for (let i = 0; i < 10; i++) {
@@ -183,7 +207,9 @@
                 }
             }
         }
+        
         function startRotation() { if (activeInterval) clearInterval(activeInterval); syncRouteFromEditor(); isPaused = false; if (currentIdx >= rotationRoute.length) currentIdx = 0; timeLeft = rotationRoute[currentIdx].seconds; runCountdown(); }
+        
         function runCountdown() {
             statusDiv.textContent = `周回中: ${rotationRoute[currentIdx].difficulty} ${rotationRoute[currentIdx].stage}`;
             updateDisplay(timeLeft);
@@ -195,6 +221,7 @@
                 updateStageTimersDisplay();
             }, 1000);
         }
+        
         function handleModalNext() { retryModal.style.display = "none"; isModalOpen = false; currentIdx = (currentIdx + 1) % rotationRoute.length; startRotation(); }
         function handleModalRetry() { retryModal.style.display = "none"; isModalOpen = false; timeLeft = rotationRoute[currentIdx].seconds; }
         window.addEventListener('keydown', (e) => { if (isModalOpen) { if (e.key === 'Enter') handleModalNext(); else if (e.key === ' ') handleModalRetry(); } });
