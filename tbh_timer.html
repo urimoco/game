@@ -4,70 +4,15 @@
     <meta charset="UTF-8">
     <title>タスクバーヒーロー カスタム自動ローテーションタイマー</title>
     <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            text-align: center;
-            padding: 30px 20px;
-            margin: 0;
-        }
-        h1 {
-            color: #ff4500;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        .status-display {
-            font-size: 28px;
-            font-weight: bold;
-            color: #bc84ee;
-            margin-bottom: 15px;
-            height: 40px;
-        }
-
-        /* タイマーエリア */
-        .timer-container {
-            display: flex;
-            justify-content: center;
-            max-width: 400px;
-            margin: 15px auto;
-        }
-        .timer-box {
-            background-color: #1a1a1a;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            flex: 1;
-        }
-        .timer-label {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .timer-display {
-            font-family: monospace;
-            font-size: 64px;
-            font-weight: bold;
-            color: #00ff88;
-            text-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        button {
-            padding: 12px 35px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 8px;
-            border: none;
-            transition: background 0.2s;
-        }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #121212; color: #e0e0e0; text-align: center; padding: 30px 20px; margin: 0; }
+        h1 { color: #ff4500; font-size: 24px; margin-bottom: 5px; }
+        .status-display { font-size: 28px; font-weight: bold; color: #bc84ee; margin-bottom: 15px; height: 40px; }
+        .timer-container { display: flex; justify-content: center; max-width: 400px; margin: 15px auto; }
+        .timer-box { background-color: #1a1a1a; padding: 15px 20px; border-radius: 12px; border: 1px solid #333; flex: 1; }
+        .timer-label { font-size: 14px; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+        .timer-display { font-family: monospace; font-size: 64px; font-weight: bold; color: #00ff88; text-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        button { padding: 12px 35px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: none; transition: background 0.2s; }
         .btn-start { background-color: #ff4500; color: #fff; }
         .btn-start:hover { background-color: #ff5722; }
         .btn-stop { background-color: #d32f2f; color: #fff; }
@@ -76,207 +21,41 @@
         .btn-resume:hover { background-color: #2196f3; }
         .btn-reset { background-color: #555; color: #fff; }
         .btn-reset:hover { background-color: #666; }
-
-        .next-preview {
-            margin-top: 25px;
-            font-size: 16px;
-            color: #777;
-            margin-bottom: 30px;
-        }
-
-        /* --- リトライ用のポップアップオーバーレイ --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: #222;
-            padding: 30px;
-            border-radius: 12px;
-            border: 2px solid #ff4500;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 0 30px rgba(255,69,0,0.3);
-        }
-        .modal-content h3 {
-            font-size: 24px;
-            color: #ff4500;
-            margin-top: 0;
-        }
-        .modal-content p {
-            font-size: 18px;
-            color: #ddd;
-            margin-bottom: 25px;
-        }
-        .modal-btns {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .btn-action {
-            padding: 12px;
-            font-size: 18px;
-            width: 100%;
-        }
+        .next-preview { margin-top: 25px; font-size: 16px; color: #777; margin-bottom: 30px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: #222; padding: 30px; border-radius: 12px; border: 2px solid #ff4500; max-width: 500px; width: 90%; box-shadow: 0 0 30px rgba(255,69,0,0.3); }
+        .modal-content h3 { font-size: 24px; color: #ff4500; margin-top: 0; }
+        .modal-content p { font-size: 18px; color: #ddd; margin-bottom: 25px; }
+        .modal-btns { display: flex; flex-direction: column; gap: 12px; }
+        .btn-action { padding: 12px; font-size: 18px; width: 100%; }
         .btn-ok { background-color: #00ff88; color: #121212; }
         .btn-ok:hover { background-color: #33ffa3; }
         .btn-retry { background-color: #ffb300; color: #121212; }
         .btn-retry:hover { background-color: #ffc433; }
-
-        /* --- 編集エリア・各ステージ行のスタイル --- */
-        .edit-section {
-            max-width: 850px;
-            margin: 0 auto 20px auto;
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            text-align: left;
-        }
-        .edit-section h2 {
-            font-size: 18px;
-            color: #ff4500;
-            margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 8px;
-        }
-        .global-setting-box {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            border-left: 4px solid #00e5ff;
-        }
-        .global-setting-box label {
-            font-weight: bold;
-            color: #00e5ff;
-            margin-right: 10px;
-        }
-        .calc-result-box {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #444;
-            font-size: 15px;
-            color: #ccc;
-        }
-        .route-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            background: #252525;
-            padding: 8px;
-            border-radius: 6px;
-        }
-        .route-row .index-lbl {
-            font-weight: bold;
-            color: #aaa;
-            min-width: 25px;
-        }
-        select, input[type="number"] {
-            background-color: #121212;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 6px;
-            border-radius: 4px;
-        }
+        .edit-section { max-width: 850px; margin: 0 auto 20px auto; background-color: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #333; text-align: left; }
+        .edit-section h2 { font-size: 18px; color: #ff4500; margin: 0 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .global-setting-box { background-color: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #00e5ff; }
+        .global-setting-box label { font-weight: bold; color: #00e5ff; margin-right: 10px; }
+        .calc-result-box { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #444; font-size: 15px; color: #ccc; }
+        .route-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #252525; padding: 8px; border-radius: 6px; }
+        .index-lbl { font-weight: bold; color: #aaa; min-width: 25px; }
+        select, input[type="number"] { background-color: #121212; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; }
         .sec-input { width: 65px; }
         .min-input { width: 60px; }
-
-        /* 各ステージ毎の個別経過時間タイマー用スタイル */
-        .stage-timer-badge {
-            margin-left: auto; 
-            background-color: #121212;
-            padding: 4px 12px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            font-family: monospace;
-            font-size: 14px;
-            color: #00e5ff;
-            min-width: 180px;
-            text-align: center;
-        }
-        .stage-timer-ready {
-            color: #00ff88;
-            border-color: #00ff88;
-            font-weight: bold;
-            animation: pulse 1.5s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 2px rgba(0,255,136,0.2); }
-            100% { box-shadow: 0 0 8px rgba(0,255,136,0.6); }
-        }
-        
-        .edit-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn-edit-action {
-            padding: 6px 14px;
-            font-size: 14px;
-            background-color: #333;
-            color: #fff;
-            border: 1px solid #555;
-        }
+        .stage-timer-badge { margin-left: auto; background-color: #121212; padding: 4px 12px; border-radius: 4px; border: 1px solid #444; font-family: monospace; font-size: 14px; color: #00e5ff; min-width: 180px; text-align: center; }
+        .stage-timer-ready { color: #00ff88; border-color: #00ff88; font-weight: bold; animation: pulse 1.5s infinite alternate; }
+        @keyframes pulse { 0% { box-shadow: 0 0 2px rgba(0,255,136,0.2); } 100% { box-shadow: 0 0 8px rgba(0,255,136,0.6); } }
+        .edit-controls { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-edit-action { padding: 6px 14px; font-size: 14px; background-color: #333; color: #fff; border: 1px solid #555; }
         .btn-edit-action:hover { background-color: #444; }
         .btn-add { border-color: #00ff88; color: #00ff88; }
         .btn-remove { border-color: #ff3333; color: #ff3333; }
-
-        /* --- 【新規】メモエリアのスタイル --- */
-        .memo-section {
-            max-width: 850px;
-            margin: 0 auto 40px auto;
-            background-color: #161616;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #2ae5ff33;
-            text-align: left;
-        }
-        .memo-section h2 {
-            font-size: 16px;
-            color: #00e5ff;
-            margin-top: 0;
-            margin-bottom: 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #2b2b2b;
-        }
-        .memo-content {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #b5b5b5;
-        }
-        .memo-content ul {
-            margin: 5px 0 0 0;
-            padding-left: 20px;
-        }
-        .memo-content li {
-            margin-bottom: 4px;
-        }
-        .memo-content strong {
-            color: #fff;
-        }
+        .memo-section { max-width: 850px; margin: 0 auto 40px auto; background-color: #161616; padding: 20px; border-radius: 10px; border: 1px solid #2ae5ff33; text-align: left; }
     </style>
 </head>
 <body>
 
-    <script>
-        const DEFAULT_ROUTE = [
-            { difficulty: "トーメント",  stage: "2-5", seconds: 244 },
-            { difficulty: "ヘル",        stage: "2-5", seconds: 182 },
-            { difficulty: "ナイトメア",  stage: "2-5", seconds: 136 },
-            { difficulty: "ノーマル",    stage: "2-5", seconds: 65  }
-        ];
-    </script>
-
     <h1>タスクバーヒーロー 周回</h1>
-    
     <div id="status" class="status-display">待機中</div>
 
     <div class="timer-container">
@@ -296,28 +75,24 @@
 
     <div id="retry-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="modal-title">宝箱リキャスト完了</h3>
-            <p id="modal-msg">出現しましたか？出ていない場合はリトライを選択してください。</p>
+            <h3>周回終了：宝箱の確認</h3>
+            <p>このステージの宝箱は回収できましたか？</p>
             <div class="modal-btns">
-                <button class="btn-action btn-ok" onclick="handleModalNext()">OK (次へ進む) [Enter]</button>
-                <button id="btn-modal-retry-lbl" class="btn-action btn-retry" onclick="handleModalRetry()">同じ秒数でもう一度リトライ [Space]</button>
+                <button class="btn-action btn-ok" onclick="handleModalNext()">回収完了（次へ進む）[Enter]</button>
+                <button id="btn-modal-retry-lbl" class="btn-action btn-retry" onclick="handleModalRetry()">未回収（同じ秒数でリトライ）[Space]</button>
             </div>
         </div>
     </div>
 
     <div class="edit-section">
-        <h2><span>🔄 周回ルート・情報の編集</span></h2>
-        
+        <h2>🔄 周回ルート・情報の編集</h2>
         <div class="global-setting-box">
             <div>
                 <label>⏱ 宝箱の再出現時間 (リキャスト) :</label>
                 <input type="number" id="global-target-min" class="min-input" value="13" min="0" oninput="saveGlobalTarget(); calculateRouteTotal(); updateStageTimersDisplay();"> 分
             </div>
-            <div id="calc-result" class="calc-result-box">
-                現在のルート合計時間: 0分00秒 (宝箱の再出現時間に対して: — 足りない)
-            </div>
+            <div id="calc-result" class="calc-result-box"></div>
         </div>
-
         <div id="editor-list"></div>
         <div class="edit-controls">
             <button class="btn-edit-action btn-add" onclick="addEditorRowWithSave()">行を追加 (+)</button>
@@ -325,372 +100,120 @@
         </div>
     </div>
 
-    <div class="memo-section">
-        <h2>📝 宝箱ドロップ＆仕様メモ</h2>
-        <div class="memo-content">
-            <div>宝箱はステージいくつかの塊で同じものがでる（13分リキャ）</div>
-            <ul>
-                <li>ノーマル 1-1～1-3 ➔ <strong>Lv1</strong></li>
-                <li>ノーマル 1-4～1-7 ➔ <strong>Lv2</strong></li>
-                <li>ノーマル 1-8～2-2 ➔ <strong>Lv3</strong></li>
-                <li>ノーマル 2-3～2-7 ➔ <strong>Lv15</strong></li>
-                <li>ノーマル 2-8～3-7 ➔ <strong>Lv20</strong></li>
-                <li>ノーマル 3-8～ナイトメア 1-8 ➔ <strong>Lv30</strong></li>
-                <li>ナイトメア 1-9～3-4 ➔ <strong>Lv40</strong></li>
-                <li>ナイトメア 3-5～ヘル 2-4 ➔ <strong>Lv50</strong></li>
-                <li>ヘル 2-5～トーメント 1-2 ➔ <strong>Lv60</strong></li>
-                <li>トーメント 1-3～ ➔ <strong>Lv80</strong></li>
-            </ul>
-        </div>
-    </div>
-
     <script>
-        let currentIdx = 0;
-        let timeLeft = 0;             
-        
-        let stageElapsedSeconds = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        let isStageTrackingStarted = [false, false, false, false, false, false, false, false, false, false];
-        
-        let activeInterval = null;
-        let isPaused = false;
-        let audioContext = null;
-        let rotationRoute = [];
-        let isModalOpen = false;
+        const DEFAULT_ROUTE = [
+            { difficulty: "トーメント", stage: "2-5", seconds: 244 },
+            { difficulty: "ヘル", stage: "2-5", seconds: 182 },
+            { difficulty: "ナイトメア", stage: "2-5", seconds: 136 },
+            { difficulty: "ノーマル", stage: "2-5", seconds: 65 }
+        ];
 
-        const statusDiv = document.getElementById('status');
-        const timerDiv = document.getElementById('timer');
-        
-        const btnMain = document.getElementById('btn-main');
-        const btnSub = document.getElementById('btn-sub');
-        const btnRst = document.getElementById('btn-rst');
-        const nextPreview = document.getElementById('next-preview');
-        const editorList = document.getElementById('editor-list');
-        
-        const retryModal = document.getElementById('retry-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const btnModalRetryLbl = document.getElementById('btn-modal-retry-lbl');
+        let currentIdx = 0, timeLeft = 0, stageElapsedSeconds = new Array(10).fill(0), isStageTrackingStarted = new Array(10).fill(false), activeInterval = null, isPaused = false, audioContext = null, rotationRoute = [], isModalOpen = false;
+
+        const statusDiv = document.getElementById('status'), timerDiv = document.getElementById('timer'), btnMain = document.getElementById('btn-main'), btnSub = document.getElementById('btn-sub'), btnRst = document.getElementById('btn-rst'), nextPreview = document.getElementById('next-preview'), editorList = document.getElementById('editor-list'), retryModal = document.getElementById('retry-modal'), btnModalRetryLbl = document.getElementById('btn-modal-retry-lbl');
 
         window.onload = function() {
             const savedMin = localStorage.getItem('tb_hero_g_min');
             if(savedMin !== null) document.getElementById('global-target-min').value = savedMin;
-
             const savedData = localStorage.getItem('tb_hero_route');
             if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    parsed.forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds));
-                } catch(e) { loadDefaultRoute(); }
+                try { JSON.parse(savedData).forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds)); } catch(e) { loadDefaultRoute(); }
             } else { loadDefaultRoute(); }
-
             initFirstStageDisplay();
-            calculateRouteTotal(); 
+            calculateRouteTotal();
             updateStageTimersDisplay();
         };
 
-        function loadDefaultRoute() {
-            DEFAULT_ROUTE.forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds));
-        }
-
+        function loadDefaultRoute() { DEFAULT_ROUTE.forEach(slot => addEditorRow(slot.difficulty, slot.stage, slot.seconds)); }
         function initFirstStageDisplay() {
             syncRouteFromEditor();
             if (rotationRoute.length > 0) {
                 updateDisplay(rotationRoute[0].seconds);
-                statusDiv.textContent = `待機中: 次は ${rotationRoute[0].difficulty} [${rotationRoute[0].stage}]`;
+                statusDiv.textContent = `待機中 (次: ${rotationRoute[0].difficulty} ${rotationRoute[0].stage})`;
             }
         }
-
-        function saveGlobalTarget() {
-            const m = document.getElementById('global-target-min').value;
-            localStorage.setItem('tb_hero_g_min', m);
-        }
-
+        function saveGlobalTarget() { localStorage.setItem('tb_hero_g_min', document.getElementById('global-target-min').value); }
         function calculateRouteTotal() {
             let totalSec = 0;
-            const rows = editorList.querySelectorAll('.route-row');
-            rows.forEach(row => {
-                const secs = parseInt(row.querySelector('.edit-secs').value, 10) || 0;
-                totalSec += secs;
-            });
-
-            const rMin = Math.floor(totalSec / 60);
-            const rSec = totalSec % 60;
-
-            const targetMin = parseInt(document.getElementById('global-target-min').value, 10) || 0;
-            const targetTotalSeconds = targetMin * 60;
-
-            const diff = totalSec - targetTotalSeconds;
-            let statusText = "";
-
-            if (diff < 0) {
-                const absDiff = Math.abs(diff);
-                const dMin = Math.floor(absDiff / 60);
-                const dSec = absDiff % 60;
-                const timeStr = dMin > 0 ? `${dMin}分${dSec}秒` : `${dSec}秒`;
-                statusText = `<span style="color: #00e5ff; font-weight:bold;">${timeStr} 足りない</span>`;
-            } else {
-                const dMin = Math.floor(diff / 60);
-                const dSec = diff % 60;
-                const timeStr = dMin > 0 ? `${dMin}分${dSec}秒` : `${dSec}秒`;
-                statusText = `<span style="color: #00ff88; font-weight:bold;">${timeStr} 足りる</span>`;
-            }
-
-            document.getElementById('calc-result').innerHTML = 
-                `📋 現在のルート合計時間: <strong>${rMin}分${rSec}秒</strong> ／ 宝箱の再出現時間に対して: ${statusText}`;
+            editorList.querySelectorAll('.route-row').forEach(row => { totalSec += parseInt(row.querySelector('.edit-secs').value, 10) || 0; });
+            const rMin = Math.floor(totalSec / 60), rSec = totalSec % 60, targetMin = parseInt(document.getElementById('global-target-min').value, 10) || 0, diff = totalSec - (targetMin * 60);
+            let statusText = diff < 0 ? `<span style="color: #00e5ff; font-weight:bold;">${Math.abs(diff)}秒足りない</span>` : `<span style="color: #00ff88; font-weight:bold;">${diff}秒足りる</span>`;
+            document.getElementById('calc-result').innerHTML = `📋 合計: <strong>${rMin}分${rSec}秒</strong> ／ 宝箱リキャストに対して: ${statusText}`;
         }
-
         function addEditorRow(diff = "ノーマル", stage = "2-5", secs = 60) {
             const currentRows = editorList.children.length;
-            if (currentRows >= 10) { alert("登録できるのは最大10個までです。"); return false; }
-
-            const row = document.createElement('div');
-            row.className = 'route-row';
-            row.setAttribute('data-index', currentRows); 
-            
-            const idxLbl = document.createElement('span');
-            idxLbl.className = 'index-lbl';
-            idxLbl.textContent = `${currentRows + 1}.`;
-
-            const diffs = ["ノーマル", "ナイトメア", "ヘル", "トーメント"];
-            let diffHtml = `<select class="edit-diff" onchange="syncRouteFromEditor(); updateFirstDisplayOnEdit();"><option></option>`;
-            diffs.forEach(d => { diffHtml += `<option value="${d}" ${d === diff ? 'selected' : ''}>${d}</option>`; });
-            diffHtml += `</select>`;
-
-            let stageHtml = `<select class="edit-stage" onchange="syncRouteFromEditor(); updateFirstDisplayOnEdit();">`;
-            for (let world = 1; world <= 3; world++) {
-                for (let s = 1; s <= 10; s++) {
-                    const val = `${world}-${s}`;
-                    stageHtml += `<option value="${val}" ${val === stage ? 'selected' : ''}>${val}</option>`;
-                }
-            }
-            stageHtml += `</select>`;
-
-            let secHtml = `<input type="number" class="edit-secs sec-input" value="${secs}" min="1" oninput="syncRouteFromEditor(); updateFirstDisplayOnEdit(); calculateRouteTotal();"> 秒`;
-            let timerHtml = `<div class="stage-timer-badge" id="stage-timer-${currentRows}">前回の取得から: —</div>`;
-
-            row.innerHTML = diffHtml + stageHtml + secHtml + timerHtml;
-            row.insertBefore(idxLbl, row.firstChild);
+            if (currentRows >= 10) return false;
+            const row = document.createElement('div'); row.className = 'route-row';
+            row.innerHTML = `<span class="index-lbl">${currentRows + 1}.</span>` +
+                `<select class="edit-diff">${["ノーマル", "ナイトメア", "ヘル", "トーメント"].map(d => `<option value="${d}" ${d === diff ? 'selected' : ''}>${d}</option>`).join('')}</select>` +
+                `<select class="edit-stage">${Array.from({length:30}, (_,i) => `<option value="${Math.floor(i/10)+1}-${(i%10)+1}" ${Math.floor(i/10)+1}-${(i%10)+1 === stage ? 'selected' : ''}>${Math.floor(i/10)+1}-${(i%10)+1}</option>`).join('')}</select>` +
+                `<input type="number" class="edit-secs sec-input" value="${secs}"> 秒` +
+                `<div class="stage-timer-badge" id="stage-timer-${currentRows}">待機中</div>`;
             editorList.appendChild(row);
             return true;
         }
-
-        function addEditorRowWithSave() { if(addEditorRow()) { syncRouteFromEditor(); updateFirstDisplayOnEdit(); calculateRouteTotal(); updateStageTimersDisplay(); } }
-        function removeEditorRowWithSave() {
-            if (editorList.children.length <= 1) { alert("最低1つのステージが必要です。"); return; }
-            const lastIdx = editorList.children.length - 1;
-            isStageTrackingStarted[lastIdx] = false;
-            stageElapsedSeconds[lastIdx] = 0;
-            
-            editorList.removeChild(editorList.lastChild);
-            syncRouteFromEditor();
-            updateFirstDisplayOnEdit();
-            calculateRouteTotal();
-        }
-
+        function addEditorRowWithSave() { addEditorRow(); syncRouteFromEditor(); updateFirstDisplayOnEdit(); calculateRouteTotal(); }
+        function removeEditorRowWithSave() { if (editorList.children.length > 1) { editorList.removeChild(editorList.lastChild); syncRouteFromEditor(); calculateRouteTotal(); } }
         function syncRouteFromEditor() {
             rotationRoute = [];
-            const rows = editorList.querySelectorAll('.route-row');
-            rows.forEach(row => {
-                const diff = row.querySelector('.edit-diff').value;
-                const stage = row.querySelector('.edit-stage').value;
-                const secs = parseInt(row.querySelector('.edit-secs').value, 10) || 1;
-                rotationRoute.push({ difficulty: diff, stage: stage, seconds: secs });
-            });
+            editorList.querySelectorAll('.route-row').forEach(row => { rotationRoute.push({ difficulty: row.querySelector('.edit-diff').value, stage: row.querySelector('.edit-stage').value, seconds: parseInt(row.querySelector('.edit-secs').value, 10) }); });
             localStorage.setItem('tb_hero_route', JSON.stringify(rotationRoute));
         }
-
-        function updateFirstDisplayOnEdit() {
-            if (!activeInterval && !isPaused && totalElapsedSecondsAll() === 0) {
-                if (rotationRoute.length > 0) {
-                    updateDisplay(rotationRoute[0].seconds);
-                    statusDiv.textContent = `待機中: 次は ${rotationRoute[0].difficulty} [${rotationRoute[0].stage}]`;
-                }
-            }
-        }
-
-        function totalElapsedSecondsAll() {
-            return stageElapsedSeconds.reduce((a, b) => a + b, 0);
-        }
-
+        function updateFirstDisplayOnEdit() { if (!activeInterval && !isPaused && rotationRoute.length > 0) initFirstStageDisplay(); }
         function updateStageTimersDisplay() {
-            const targetMin = parseInt(document.getElementById('global-target-min').value, 10) || 0;
-            const targetTotalSeconds = targetMin * 60;
-
+            const targetTotalSeconds = (parseInt(document.getElementById('global-target-min').value, 10) || 0) * 60;
             for (let i = 0; i < 10; i++) {
                 const badge = document.getElementById(`stage-timer-${i}`);
                 if (!badge) continue;
-
-                if (!isStageTrackingStarted[i]) {
-                    badge.textContent = "前回の取得から: 待機中";
-                    badge.className = "stage-timer-badge";
-                    continue;
-                }
-
-                const elapsed = stageElapsedSeconds[i];
-                const m = Math.floor(elapsed / 60);
-                const s = elapsed % 60;
-
-                if (elapsed >= targetTotalSeconds) {
-                    badge.textContent = `🟢 取得可能！ (${m}分${s}秒経過)`;
-                    badge.className = "stage-timer-badge stage-timer-ready";
-                } else {
-                    badge.textContent = `取得から: ${String(m).padStart(2, '0')}分${String(s).padStart(2, '0')}秒`;
-                    badge.className = "stage-timer-badge";
+                if (!isStageTrackingStarted[i]) { badge.textContent = "待機中"; badge.className = "stage-timer-badge"; }
+                else {
+                    const elapsed = stageElapsedSeconds[i];
+                    badge.textContent = elapsed >= targetTotalSeconds ? `🟢 取得可能！ (${Math.floor(elapsed/60)}分${elapsed%60}秒)` : `経過: ${Math.floor(elapsed/60)}分${elapsed%60}秒`;
+                    badge.className = elapsed >= targetTotalSeconds ? "stage-timer-badge stage-timer-ready" : "stage-timer-badge";
                 }
             }
         }
-
         function startRotation() {
             if (activeInterval) clearInterval(activeInterval);
             syncRouteFromEditor();
             isPaused = false;
-            
             if (currentIdx >= rotationRoute.length) currentIdx = 0;
-
-            const currentTask = rotationRoute[currentIdx];
-            timeLeft = currentTask.seconds;
-
+            timeLeft = rotationRoute[currentIdx].seconds;
             runCountdown();
         }
-
         function runCountdown() {
-            const currentTask = rotationRoute[currentIdx];
-            statusDiv.textContent = `🔥 現在: ${currentTask.difficulty} [${currentTask.stage}]`;
-            
+            statusDiv.textContent = `周回中: ${rotationRoute[currentIdx].difficulty} ${rotationRoute[currentIdx].stage}`;
             updateDisplay(timeLeft);
             updateNextPreview();
-            updateStageTimersDisplay();
-
-            btnMain.style.display = "none";
-            btnSub.style.display = "inline-block";
-            btnSub.textContent = "一時停止";
-            btnSub.className = "btn-stop";
-            btnRst.style.display = "inline-block";
-
+            btnMain.style.display = "none"; btnSub.style.display = "inline-block"; btnSub.textContent = "一時停止"; btnRst.style.display = "inline-block";
             activeInterval = setInterval(() => {
                 if (!isPaused && timeLeft > 0) {
                     timeLeft--;
                     updateDisplay(timeLeft);
-                    
                     if (timeLeft <= 0) {
-                        playSoftBell(); 
-                        
-                        stageElapsedSeconds[currentIdx] = 0;
+                        playSoftBell();
                         isStageTrackingStarted[currentIdx] = true;
-
-                        openRetryModal(currentTask);
+                        stageElapsedSeconds[currentIdx] = 0;
+                        retryModal.style.display = "flex"; isModalOpen = true;
                     }
                 }
-
-                for (let i = 0; i < rotationRoute.length; i++) {
-                    if (isStageTrackingStarted[i]) {
-                        stageElapsedSeconds[i]++;
-                    }
-                }
+                for (let i = 0; i < rotationRoute.length; i++) if (isStageTrackingStarted[i]) stageElapsedSeconds[i]++;
                 updateStageTimersDisplay();
             }, 1000);
         }
-
-        function openRetryModal(task) {
-            modalTitle.textContent = `宝箱: ${task.difficulty} [${task.stage}]`;
-            btnModalRetryLbl.textContent = `${task.seconds}秒でもう一度リトライ [Space]`;
-            retryModal.style.display = "flex";
-            isModalOpen = true;
-        }
-
-        function handleModalNext() {
-            retryModal.style.display = "none";
-            isModalOpen = false;
-            
-            currentIdx = (currentIdx + 1) % rotationRoute.length;
-            startRotation();
-        }
-
-        function handleModalRetry() {
-            retryModal.style.display = "none";
-            isModalOpen = false;
-            
-            timeLeft = rotationRoute[currentIdx].seconds; 
-        }
-
-        window.addEventListener('keydown', function(e) {
-            if (!isModalOpen) return;
-
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleModalNext();
-            } else if (e.key === ' ' || e.code === 'Space') {
-                e.preventDefault();
-                handleModalRetry();
-            }
-        });
-
-        function resetRotation() {
-            if (activeInterval) { clearInterval(activeInterval); activeInterval = null; }
-            retryModal.style.display = "none";
-            isModalOpen = false;
-            isPaused = false;
-            currentIdx = 0;
-            timeLeft = 0;
-
-            for(let i=0; i<10; i++) {
-                stageElapsedSeconds[i] = 0;
-                isStageTrackingStarted[i] = false;
-            }
-
-            nextPreview.textContent = "";
-            btnMain.style.display = "inline-block";
-            btnSub.style.display = "none";
-            btnRst.style.display = "none";
-
-            initFirstStageDisplay();
-            updateStageTimersDisplay();
-        }
-
+        function handleModalNext() { retryModal.style.display = "none"; isModalOpen = false; currentIdx = (currentIdx + 1) % rotationRoute.length; startRotation(); }
+        function handleModalRetry() { retryModal.style.display = "none"; isModalOpen = false; timeLeft = rotationRoute[currentIdx].seconds; }
+        window.addEventListener('keydown', (e) => { if (isModalOpen) { if (e.key === 'Enter') handleModalNext(); else if (e.key === ' ') handleModalRetry(); } });
+        function resetRotation() { clearInterval(activeInterval); activeInterval = null; currentIdx = 0; timeLeft = 0; stageElapsedSeconds.fill(0); isStageTrackingStarted.fill(false); btnMain.style.display = "inline-block"; btnSub.style.display = "none"; btnRst.style.display = "none"; initFirstStageDisplay(); updateStageTimersDisplay(); }
         function togglePause() {
-            if (!activeInterval) return;
-
-            if (!isPaused) {
-                isPaused = true;
-                btnSub.textContent = "再開 (▶️)"; btnSub.className = "btn-resume";
-                statusDiv.textContent = `🛑 一時停止中: ${rotationRoute[currentIdx].difficulty}`;
-            } else {
-                isPaused = false;
-                btnSub.textContent = "一時停止"; btnSub.className = "btn-stop";
-                statusDiv.textContent = `🔥 現在: ${rotationRoute[currentIdx].difficulty} [${rotationRoute[currentIdx].stage}]`;
-            }
+            isPaused = !isPaused;
+            btnSub.textContent = isPaused ? "再開 (▶️)" : "一時停止";
+            btnSub.className = isPaused ? "btn-resume" : "btn-stop";
+            statusDiv.textContent = isPaused ? `一時停止中: ${rotationRoute[currentIdx].difficulty}` : `周回中: ${rotationRoute[currentIdx].difficulty} ${rotationRoute[currentIdx].stage}`;
         }
-
-        function updateDisplay(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = seconds % 60;
-            timerDiv.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-        }
-
-        function updateNextPreview() {
-            const nextIdx = (currentIdx + 1) % rotationRoute.length;
-            const nextTask = rotationRoute[nextIdx];
-            nextPreview.textContent = `⏭ 次の予定: ${nextTask.difficulty} [${nextTask.stage}] (${nextTask.seconds}秒)`;
-        }
-
-        function playSoftBell() {
-            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const now = audioContext.currentTime;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(440, now);
-            
-            gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.3, now + 0.03); 
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4); 
-            
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            
-            osc.start(now);
-            osc.stop(now + 0.45); 
-        }
+        function updateDisplay(s) { timerDiv.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }
+        function updateNextPreview() { const n = rotationRoute[(currentIdx + 1) % rotationRoute.length]; nextPreview.textContent = `⏭ 次: ${n.difficulty} ${n.stage}`; }
+        function playSoftBell() { const ctx = new (window.AudioContext || window.webkitAudioContext)(), osc = ctx.createOscillator(), gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = 440; gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4); osc.start(); osc.stop(ctx.currentTime + 0.45); }
     </script>
 </body>
 </html>
