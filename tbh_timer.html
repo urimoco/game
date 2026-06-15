@@ -247,7 +247,7 @@
 
     <div class="timer-container">
         <div class="timer-box">
-            <div class="timer-label">🔄 リキャストタイマー</div>
+            <div class="timer-label">🔄 次のステージへのリキャスト</div>
             <div id="timer" class="timer-display">00:00</div>
         </div>
     </div>
@@ -276,11 +276,11 @@
         
         <div class="global-setting-box">
             <div>
-                <label>⏱ 総合目標リキャスト時間 :</label>
+                <label>⏱ 宝箱の再出現時間 (リキャスト) :</label>
                 <input type="number" id="global-target-min" class="min-input" value="13" min="0" oninput="saveGlobalTarget(); calculateRouteTotal(); updateStageTimersDisplay();"> 分
             </div>
             <div id="calc-result" class="calc-result-box">
-                現在のルート合計時間: 0分00秒 (目標まであと — 足りない)
+                現在のルート合計時間: 0分00秒 (宝箱の再出現時間に対して: — 足りない)
             </div>
         </div>
 
@@ -351,7 +351,7 @@
             localStorage.setItem('tb_hero_g_min', m);
         }
 
-        // 【言葉の修正】何分何秒足りない / 足りる の出力ロジック
+        // 【テキスト修正反映】
         function calculateRouteTotal() {
             let totalSec = 0;
             const rows = editorList.querySelectorAll('.route-row');
@@ -383,7 +383,7 @@
             }
 
             document.getElementById('calc-result').innerHTML = 
-                `📋 現在のルート合計時間: <strong>${rMin}分${rSec}秒</strong> ／ 目標に対して: ${statusText}`;
+                `📋 現在のルート合計時間: <strong>${rMin}分${rSec}秒</strong> ／ 宝箱の再出現時間に対して: ${statusText}`;
         }
 
         function addEditorRow(diff = "ノーマル", stage = "2-5", secs = 60) {
@@ -521,6 +521,10 @@
                     
                     if (timeLeft <= 0) {
                         playSoftBell(); 
+                        
+                        stageElapsedSeconds[currentIdx] = 0;
+                        isStageTrackingStarted[currentIdx] = true;
+
                         openRetryModal(currentTask);
                     }
                 }
@@ -545,9 +549,6 @@
             retryModal.style.display = "none";
             isModalOpen = false;
             
-            stageElapsedSeconds[currentIdx] = 0;
-            isStageTrackingStarted[currentIdx] = true;
-
             currentIdx = (currentIdx + 1) % rotationRoute.length;
             startRotation();
         }
